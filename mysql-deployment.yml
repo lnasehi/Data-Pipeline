@@ -1,0 +1,48 @@
+# Define the Deployment for MySQL
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql-deployment  # Name of the deployment
+  labels:
+    app: mysql  # Label to identify the deployment as MySQL
+spec:
+  replicas: 1  # Number of replicas (pods) to create
+  selector:
+    matchLabels:
+      app: mysql  # Match the label to select the appropriate pods
+  template:
+    metadata:
+      labels:
+        app: mysql  # Label for the pods
+    spec:
+      containers:
+        - name: mysql-container  # Name of the container
+          image: mysql:latest  # Container image to use for MySQL
+          env:
+            - name: MYSQL_ROOT_PASSWORD  # Environment variable for MySQL root password
+              value: password  # Set the password value
+          ports:
+            - containerPort: 3306  # Port to expose for MySQL
+          volumeMounts:
+            - name: mysql-data  # Name of the volume mount
+              mountPath: /var/lib/mysql  # Mount path for persistent data storage
+      volumes:
+        - name: mysql-data  # Name of the volume
+          persistentVolumeClaim:
+            claimName: mysql-pvc  # Name of the PersistentVolumeClaim to use for data storage
+
+# Define the Service for MySQL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-service  # Name of the service
+  labels:
+    app: mysql  # Label to identify the service as MySQL
+spec:
+  selector:
+    app: mysql  # Select the pods with the matching label
+  ports:
+    - protocol: TCP
+      port: 3306  # Port to expose for MySQL
+      targetPort: 3306  # Target port of the pods
